@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="id"></div>
+</body>
+//引用相关js
+<script language='javascript' src='lib/jquery-3.3.1.min.js'></script>"
+<script language='javascript' src='lib/three_110.min.js'></script>"
+<script language='javascript' src='lib/Tween.js'></script>
+<script language='javascript' src='lib/inflate.min.js'></script>
+<script language='javascript' src='lib/FBXLoader.js'></script>
+<script language='javascript' src='lib/OrbitControls.js'></script>
+<script language='javascript' src='lib/stats.min.js'></script>
+<script language='javascript' src='lib/dat.gui.min.js'></script>
+<script src="TD.js"></script>
+<script type="text/javascript">
+    var td = new TD('id');
+    td.setAllScreen();
+
+//创建平面图形 使用平面几何学
+var planeGeometry = new THREE.PlaneGeometry(60,40,1,1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
+//定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
+var planeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff,opacity: 0.5});
+//创建Mesh网格对象
+var plane = new THREE.Mesh(planeGeometry,planeMaterial);
+//设置这个平面接受光影
+plane.receiveShadow = true;
+//设置网格位置
+plane.rotation.x = -0.5 * Math.PI;
+plane.position.x = 0;
+plane.position.y = 0;
+plane.position.z = 0;
+
+////更改画布颜色
+//td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
+////添加进场景
+//setTimeout("td.addToScene('plane',plane)",3000);
+//setTimeout("td.removeToScene('plane')",6000);
+//setTimeout("td.setTest(false)",3000);
+//setTimeout("td.setTest(true)",9000);
+
+</script>
+</html>

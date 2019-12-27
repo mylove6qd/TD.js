@@ -34,8 +34,6 @@ plane.position.x = 0;
 plane.position.y = -10;
 plane.position.z = 0;
 
-
-
     //创建平面图形 使用平面几何学
     var planeGeometry1 = new THREE.PlaneGeometry(15,15,1,1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
     //定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
@@ -50,7 +48,6 @@ plane.position.z = 0;
     plane1.position.y = -2;
     plane1.position.z = 0;
 
-
 //白光
     var ambientLight = new THREE.AmbientLight(0xFFFFFF);
 
@@ -58,8 +55,16 @@ plane.position.z = 0;
 td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
 //添加进场景
 
-    td.addToScene('ambientLight',ambientLight);
-    td.addToScene('plane',plane);
-    td.addToScene('plane1',plane1);
+
+    td.addToScene(ambientLight,'ambientLight');
+    td.addToScene(plane,'plane');
+    td.addToScene(plane1,'plane1');
+    plane1.click(function () {
+        this.material.color=(new THREE.Color(Math.random() * 0xffffff));
+    });
+    plane.clickThrough(function () {
+        this.material.color=(new THREE.Color(Math.random() * 0xffffff));
+    });
+
 </script>
 </html>

@@ -15,7 +15,8 @@ class TD {
         this.renderer.render(this.scene, this.camera);
     };
     //向场景中添加对象
-    addToScene = function (name, obj3d) {
+    addToScene = function (obj3d,name) {
+        if(name==undefined){ this.scene.add(obj3d);return}
         if (this._sceneChildrenNameId.has(name)) {
             return false;
         }
@@ -25,12 +26,18 @@ class TD {
         return true;
     };
     //添加多个
-    addsToScene = function (names, obj3ds) {
+    addsToScene = function (obj3ds,names) {
+        if(names==undefined){
+            obj3ds.forEach((item, index) => {
+                this.addToScene(item);
+            });
+            return
+        }
         if (names.length != obj3ds.length) {
             return;
         }
         names.forEach((item, index) => {
-            this.addToScene(item, obj3ds[index]);
+            this.addToScene(obj3ds[index],item);
         });
     };
     //删除多个
@@ -70,15 +77,9 @@ class TD {
             if (bol) {
                 //是测试
                 this.container.appendChild(this.stats.domElement);
-                //网格助手
-                var defaultGridHelper = new THREE.GridHelper(10, 20, 0xffffff, 0xffffff);
-                //辅助线
-                var defaultAxesHelper = new THREE.AxesHelper(1000000);
-                this.addsToScene(['defaultGridHelper', 'defaultAxesHelper'], [defaultGridHelper, defaultAxesHelper]);
             } else {
                 //不是测试
                 this.container.removeChild(this.stats.domElement);
-                this.removesToScene(["defaultGridHelper", "defaultAxesHelper"]);
             }
         }
     };
@@ -117,18 +118,28 @@ class TD {
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
 //添加Object3D的事件监听
 TD.prototype._addMouseListener = function (obj) {
-    obj.container.addEventListener("mousedown", (event) => {
+    //单击事件
+    obj.container.addEventListener("click", (event) => {
         let mouse = new THREE.Vector2();
         let raycaster = new THREE.Raycaster();
         // 计算鼠标点击位置转换到3D场景后的位置
-        mouse.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
+        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
         // 由当前相机（视线位置）像点击位置发射线
-        raycaster.setFromCamera(mouse, this.camera);
-        let intersects = raycaster.intersectObjects(this.scene.children, true);
+        raycaster.setFromCamera(mouse, obj.camera);
+        let intersects = raycaster.intersectObjects(obj.scene.children, true);
         if (intersects.length > 0) {
             // 拿到射线第一个照射到的物体
-            console.log(intersects[0].object);
+            //是测试
+            if (obj._isTest==true){
+                console.log(intersects[0].object);
+            }
+            //判断第一个是否有单击事件
+            intersects[0].object._click && intersects[0].object._click(event);
+            //判断后面是否有穿透事件
+            for (var i = 0; i < intersects.length; i++) {
+                intersects[i].object._clickThrough && intersects[i].object._clickThrough(event);
+            }
         }
     });
 };
@@ -182,32 +193,26 @@ TD.prototype.Trand = function (min, max) {
 
 //为所有Object3D对象添加事件
 //点击事件click
-THREE.Object3D.prototype.click = function (fn,obj) {
+THREE.Object3D.prototype.click = function (fn) {
     this._click = fn || undefined;
-    this._clickObj = obj || this;
 };
 //点击穿透事件clickThrough
-THREE.Object3D.prototype.clickThrough = function (fn,obj) {
+THREE.Object3D.prototype.clickThrough = function (fn) {
     this._clickThrough = fn || undefined;
-    this._clickThroughObj = obj || this;
 };
 //双击事件dblclick
-THREE.Object3D.prototype.dblclick = function (fn,obj) {
+THREE.Object3D.prototype.dblclick = function (fn) {
     this._dblclick = fn || undefined;
-    this._dblclickObj = obj || this;
 };
 //双击穿透事件dblclickThrough
-THREE.Object3D.prototype.dblclickThrough = function (fn,obj) {
+THREE.Object3D.prototype.dblclickThrough = function (fn) {
     this._dblclickThrough = fn || undefined;
-    this._dblclickThroughObj = obj || this;
 };
 //hover事件   hover=mouseenter + mouseleave
-THREE.Object3D.prototype.hover = function (fn,obj) {
+THREE.Object3D.prototype.hover = function (fn) {
     this._hover = fn || undefined;
-    this._hoverObj = obj || this;
 };
-THREE.Object3D.prototype.hoverThrough = function (fn,obj) {
+THREE.Object3D.prototype.hoverThrough = function (fn) {
     this._hoverThrough = fn || undefined;
-    this._hoverThroughObj = obj || this;
 };
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------

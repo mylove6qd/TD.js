@@ -83,6 +83,10 @@ class TD {
             }
         }
     };
+    getTestData=function(){
+        console.log('相机位置--',this.camera.position);
+        console.log('相机视角--',this.controls.target);
+    };
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
     //-----------------------------------------------------------------构造方法-------------------------------------------------------------------------
     constructor(id) {
@@ -130,15 +134,79 @@ TD.prototype._addMouseListener = function (obj) {
         let intersects = raycaster.intersectObjects(obj.scene.children, true);
         if (intersects.length > 0) {
             // 拿到射线第一个照射到的物体
-            //是测试
-            if (obj._isTest==true){
-                console.log(intersects[0].object);
-            }
             //判断第一个是否有单击事件
             intersects[0].object._click && intersects[0].object._click(event);
             //判断后面是否有穿透事件
             for (var i = 0; i < intersects.length; i++) {
                 intersects[i].object._clickThrough && intersects[i].object._clickThrough(event);
+            }
+        }
+    });
+    //双击事件
+    obj.container.addEventListener("dblclick", (event) => {
+        let mouse = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        // 计算鼠标点击位置转换到3D场景后的位置
+        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
+        // 由当前相机（视线位置）像点击位置发射线
+        raycaster.setFromCamera(mouse, obj.camera);
+        let intersects = raycaster.intersectObjects(obj.scene.children, true);
+        if (intersects.length > 0) {
+            // 拿到射线第一个照射到的物体
+            //是否是测试
+            if (obj._isTest==true){
+                for (var i = 0; i < intersects.length; i++) {
+                    console.log('dblclick--'+i,intersects[i].object);
+                }
+            }
+            //判断第一个是否有单击事件
+            intersects[0].object._dblclick && intersects[0].object._dblclick(event);
+            //判断后面是否有穿透事件
+            for (var i = 0; i < intersects.length; i++) {
+                intersects[i].object._dblclickThrough && intersects[i].object._dblclickThrough(event);
+            }
+        }
+    });
+    //鼠标进入事件
+    obj.container.addEventListener("mouseenter", (event) => {
+        let mouse = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        // 计算鼠标点击位置转换到3D场景后的位置
+        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
+        // 由当前相机（视线位置）像点击位置发射线
+        raycaster.setFromCamera(mouse, obj.camera);
+        let intersects = raycaster.intersectObjects(obj.scene.children, true);
+        if (intersects.length > 0) {
+            // 拿到射线第一个照射到的物体
+            //是测试
+            //判断第一个是否有单击事件
+            intersects[0].object._mouseenter && intersects[0].object._mouseenter(event);
+            //判断后面是否有穿透事件
+            for (var i = 0; i < intersects.length; i++) {
+                intersects[i].object._mouseenterThrough && intersects[i].object._mouseenterThrough(event);
+            }
+        }
+    });
+
+    //鼠标移除事件
+    obj.container.addEventListener("mouseleave", (event) => {
+        let mouse = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        // 计算鼠标点击位置转换到3D场景后的位置
+        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
+        // 由当前相机（视线位置）像点击位置发射线
+        raycaster.setFromCamera(mouse, obj.camera);
+        let intersects = raycaster.intersectObjects(obj.scene.children, true);
+        if (intersects.length > 0) {
+            // 拿到射线第一个照射到的物体
+            //判断第一个是否有单击事件
+            intersects[0].object._mouseleave && intersects[0].object._mouseleave(event);
+            //判断后面是否有穿透事件
+            for (var i = 0; i < intersects.length; i++) {
+                intersects[i].object._mouseleaveThrough && intersects[i].object._mouseleaveThrough(event);
             }
         }
     });
@@ -208,11 +276,14 @@ THREE.Object3D.prototype.dblclick = function (fn) {
 THREE.Object3D.prototype.dblclickThrough = function (fn) {
     this._dblclickThrough = fn || undefined;
 };
-//hover事件   hover=mouseenter + mouseleave
-THREE.Object3D.prototype.hover = function (fn) {
-    this._hover = fn || undefined;
+//hover事件   hover=mouseenter指针进入（穿过）元素 + mouseleave指针离开元素
+THREE.Object3D.prototype.hover = function (mouseenter,mouseleave) {
+    this._mouseenter = mouseenter || undefined;
+    this._mouseleave = mouseleave || undefined;
 };
-THREE.Object3D.prototype.hoverThrough = function (fn) {
-    this._hoverThrough = fn || undefined;
+THREE.Object3D.prototype.hoverThrough = function (mouseenter,mouseleave) {
+    this._mouseenterThrough = mouseenter || undefined;
+    this._mouseleaveThrough = mouseleave || undefined;
 };
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
+class a{}

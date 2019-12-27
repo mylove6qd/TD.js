@@ -34,6 +34,26 @@ plane.position.x = 0;
 plane.position.y = -10;
 plane.position.z = 0;
 
+
+
+    //创建平面图形 使用平面几何学
+    var planeGeometry1 = new THREE.PlaneGeometry(15,15,1,1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
+    //定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
+    var planeMaterial1 = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff,opacity: 0.5});
+    //创建Mesh网格对象
+    var plane1 = new THREE.Mesh(planeGeometry1,planeMaterial1);
+    //设置这个平面接受光影
+    plane1.receiveShadow = true;
+    //设置网格位置
+    plane1.rotation.x = -0.5 * Math.PI;
+    plane1.position.x = 0;
+    plane1.position.y = -2;
+    plane1.position.z = 0;
+
+
+//白光
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF);
+
 //更改画布颜色
 td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
 //添加进场景
@@ -41,7 +61,9 @@ td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1
 // setTimeout("td.setTest(false)",3000);
 // setTimeout("td.removeToScene('plane')",6000);
 // setTimeout("td.setTest(true)",6000);
+    td.addToScene('ambientLight',ambientLight);
     td.addToScene('plane',plane);
+    td.addToScene('plane1',plane1);
     td.setTest(true);
 </script>
 </html>

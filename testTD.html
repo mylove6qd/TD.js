@@ -7,7 +7,6 @@
 <body>
 <div id="id"></div>
 </body>
-//引用相关js
 <script language='javascript' src='lib/jquery-3.3.1.min.js'></script>"
 <script language='javascript' src='lib/three_110.min.js'></script>"
 <script language='javascript' src='lib/Tween.js'></script>
@@ -32,16 +31,17 @@ plane.receiveShadow = true;
 //设置网格位置
 plane.rotation.x = -0.5 * Math.PI;
 plane.position.x = 0;
-plane.position.y = 0;
+plane.position.y = -10;
 plane.position.z = 0;
 
-////更改画布颜色
-//td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
-////添加进场景
-//setTimeout("td.addToScene('plane',plane)",3000);
-//setTimeout("td.removeToScene('plane')",6000);
-//setTimeout("td.setTest(false)",3000);
-//setTimeout("td.setTest(true)",9000);
-
+//更改画布颜色
+td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
+//添加进场景
+// setTimeout("td.addToScene('plane',plane)",3000);
+// setTimeout("td.setTest(false)",3000);
+// setTimeout("td.removeToScene('plane')",6000);
+// setTimeout("td.setTest(true)",6000);
+    td.addToScene('plane',plane);
+    td.setTest(true);
 </script>
 </html>

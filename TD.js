@@ -16,10 +16,11 @@ class TD {
     };
     //向场景中添加对象
     addToScene = function (name, obj3d) {
-        if (this._sceneChildrenNameUuid.has(name)) {
+        if (this._sceneChildrenNameId.has(name)) {
             return false;
         }
-        this._sceneChildrenNameUuid.set(name, obj3d.uuid);
+        this._sceneChildrenNameId.set(name, obj3d.id);
+        obj3d.name = name;
         this.scene.add(obj3d);
         return true;
     };
@@ -28,32 +29,28 @@ class TD {
         if (names.length != obj3ds.length) {
             return;
         }
-        names.forEach((item, index)=> {
+        names.forEach((item, index) => {
             this.addToScene(item, obj3ds[index]);
         });
     };
     //删除多个
     removesToScene = function (names) {
-        names.forEach((item, index)=> {
+        names.forEach((item, index) => {
             this.removeToScene(item);
         });
     };
     //删除场景中的对象
     removeToScene = function (name) {
-        if (this._sceneChildrenNameUuid.has(name)) {
-            this.removeToSceneFromUuid(this._sceneChildrenNameUuid.get(name));
-            this._sceneChildrenNameUuid.delete(name);
+        if (this._sceneChildrenNameId.has(name)) {
+            this.removeToSceneFromId(this._sceneChildrenNameId.get(name));
+            this._sceneChildrenNameId.delete(name);
             return true;
         }
         return false;
     };
-    //通过uuid删除场景中对象
-    removeToSceneFromUuid = function (uuid) {
-        this.scene.children.forEach((item, index)=> {
-            if (item.uuid == uuid) {
-                this.scene.remove(item);
-            }
-        });
+    //通过id删除场景中对象
+    removeToSceneFromId = function (id) {
+        this.scene.remove(this.scene.getObjectById(id));
     };
     //设置全屏
     setAllScreen = function () {
@@ -97,32 +94,33 @@ class TD {
         this.container = document.getElementById(id);    // 获取canvas容器
         this.stats = new Stats();
         this.scene = new THREE.Scene();    //创建场景
-        this._sceneChildrenNameUuid = new Map();   //可以被放入场景的名称和uuid的对应
+        this._sceneChildrenNameId = new Map();   //可以被放入场景的名称和id的对应
         this.renderer = new THREE.WebGLRenderer();    //渲染器
         this.camera = new THREE.PerspectiveCamera(60, this._WIDTH / this._HEIGHT, 1, 10000);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         //-----------------------------------------------------------------属性-------------------------------------------------------------------------
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
         //初始化相机
-        _initCamera(this);
+        TD.prototype._initCamera(this);
         //初始化渲染器
-        _initRenderer(this);
+        TD.prototype._initRenderer(this);
         //初始化性能工具
-        _initStats(this);
+        TD.prototype._initStats(this);
         //初始化视角工具
-        _initControls(this);
+        TD.prototype._initControls(this);
         //默认是测试
         this.setTest(true);
         //窗口自动变化
-        window.addEventListener('resize', _handleWindowResize.bind(this), false);
+        window.addEventListener('resize', TD.prototype._handleWindowResize.bind(this), false);
         //渲染
         this.render3D();
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
     }
 }
+
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
 // 窗口大小变动时调用
-_handleWindowResize = function () {
+TD.prototype._handleWindowResize = function () {
     // 更新渲染器的高度和宽度以及相机的纵横比
     this._HEIGHT = window.innerHeight;
     this._WIDTH = window.innerWidth;
@@ -130,13 +128,13 @@ _handleWindowResize = function () {
     // this.camera.aspect = this._WIDTH / this._HEIGHT;
     // this.camera.updateProjectionMatrix();
 };
-_initStats = function (obj) {
+TD.prototype._initStats = function (obj) {
     // 将性能监控屏区显示在左上角
     obj.stats.domElement.style.position = 'absolute';
     obj.stats.domElement.style.bottom = '0px';
     obj.stats.domElement.style.zIndex = 100;
 };
-_initControls = function (obj) {
+TD.prototype._initControls = function (obj) {
     obj.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角
     obj.controls.minDistance = 1; //最小相机移动距离
     obj.controls.maxDistance = 3000; //最大相机移动距离
@@ -144,14 +142,14 @@ _initControls = function (obj) {
     obj.controls.dampingFactor = 0.25; //惯性滑动
     // obj.controls.autoRotate = true;
 };
-_initCamera = function (obj) {
+TD.prototype._initCamera = function (obj) {
     obj.camera.position.x = -10;
     obj.camera.position.y = 10;
     obj.camera.position.z = 5;
     //默认相机看向场景中心
     obj.camera.lookAt(obj.scene.position);
 };
-_initRenderer = function (obj) {
+TD.prototype._initRenderer = function (obj) {
     obj.renderer.setSize(obj._WIDTH, obj._HEIGHT);
     //开启阴影效果需要渲染器支持，如果使用的WebGLRender 渲染器 需要开启渲染器
     obj.renderer.shadowMap.enabled = true;
@@ -159,5 +157,9 @@ _initRenderer = function (obj) {
     obj.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     //将渲染器加入对应div
     obj.container.appendChild(obj.renderer.domElement);
+};
+//随机数
+TD.prototype.Trand = function (min, max) {
+    return Math.random() * (max - min) + min;
 };
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------

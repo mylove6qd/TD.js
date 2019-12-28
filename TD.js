@@ -6,6 +6,15 @@ class TD {
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
     //渲染
     render3D = function () {
+        //每一帧发射射线获取对象存在属性中
+        //处理hover事件 因为是每一帧渲染的 所以每一帧都需要判断当前是否有新的移入和新的移除事件
+        TD.prototype._hoverProcess(this._rayObjs,TD.prototype._EmittedRay(this));
+        this._rayObjs=TD.prototype._EmittedRay(this);
+        //遍历运行所有的渲染器事件
+
+        for (var [key, value] of this._rendererEventObjMap) {
+            value._rendererEventFn();
+        }
         TWEEN.update();
         this.stats.update();
         // 循环调用
@@ -83,9 +92,38 @@ class TD {
             }
         }
     };
+    //获取测试数据
     getTestData=function(){
         console.log('相机位置--',this.camera.position);
         console.log('相机视角--',this.controls.target);
+    };
+    //在渲染器中添加事件
+    addRendererEvent = function(obj,fn,eventName){
+        if (eventName==undefined){
+            if (obj.name!=""){
+                eventName = obj.name
+            }else{
+                eventName = obj.uuid;
+            }
+        }
+        obj._rendererEventFn = fn;
+        this._rendererEventObjMap.set(eventName,obj);
+    };
+    //在渲染器中删除事件
+    removeRendererEventFromName = function(eventName){
+        if (this._rendererEventObjMap.has(eventName)){
+            //去掉对象上的方法
+            this._rendererEventObjMap.get(eventName)._rendererEventFn=undefined;
+            this._rendererEventObjMap.delete(eventName);
+        }
+    };
+    //查看所有的渲染器事件
+    allRendererEvent = function(){
+        return this._rendererEventObjMap;
+    };
+    //获取渲染器事件
+    getRendererEventObjFromName = function(eventName){
+        return this._rendererEventObjMap.get(eventName);
     };
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
     //-----------------------------------------------------------------构造方法-------------------------------------------------------------------------
@@ -103,6 +141,9 @@ class TD {
         this.renderer = new THREE.WebGLRenderer();    //渲染器
         this.camera = new THREE.PerspectiveCamera(60, this._WIDTH / this._HEIGHT, 1, 10000);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this._rendererEventObjMap = new Map();
+        this._rayObjs = [];
+        this._mousePosition = [];
         //-----------------------------------------------------------------属性-------------------------------------------------------------------------
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
         TD.prototype._initCamera(this);
@@ -122,6 +163,10 @@ class TD {
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
 //添加Object3D的事件监听
 TD.prototype._addMouseListener = function (obj) {
+    //鼠标移动事件获取鼠标坐标
+    obj.container.addEventListener("mousemove", (event) => {
+        obj._mousePosition=[event.clientX,  event.clientY];
+    });
     //单击事件
     obj.container.addEventListener("click", (event) => {
         let mouse = new THREE.Vector2();
@@ -165,48 +210,6 @@ TD.prototype._addMouseListener = function (obj) {
             //判断后面是否有穿透事件
             for (var i = 0; i < intersects.length; i++) {
                 intersects[i].object._dblclickThrough && intersects[i].object._dblclickThrough(event);
-            }
-        }
-    });
-    //鼠标进入事件
-    obj.container.addEventListener("mouseenter", (event) => {
-        let mouse = new THREE.Vector2();
-        let raycaster = new THREE.Raycaster();
-        // 计算鼠标点击位置转换到3D场景后的位置
-        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
-        // 由当前相机（视线位置）像点击位置发射线
-        raycaster.setFromCamera(mouse, obj.camera);
-        let intersects = raycaster.intersectObjects(obj.scene.children, true);
-        if (intersects.length > 0) {
-            // 拿到射线第一个照射到的物体
-            //是测试
-            //判断第一个是否有单击事件
-            intersects[0].object._mouseenter && intersects[0].object._mouseenter(event);
-            //判断后面是否有穿透事件
-            for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._mouseenterThrough && intersects[i].object._mouseenterThrough(event);
-            }
-        }
-    });
-
-    //鼠标移除事件
-    obj.container.addEventListener("mouseleave", (event) => {
-        let mouse = new THREE.Vector2();
-        let raycaster = new THREE.Raycaster();
-        // 计算鼠标点击位置转换到3D场景后的位置
-        mouse.x = (event.clientX / obj.renderer.domElement.clientWidth) * 2 - 1;
-        mouse.y = -(event.clientY / obj.renderer.domElement.clientHeight) * 2 + 1;
-        // 由当前相机（视线位置）像点击位置发射线
-        raycaster.setFromCamera(mouse, obj.camera);
-        let intersects = raycaster.intersectObjects(obj.scene.children, true);
-        if (intersects.length > 0) {
-            // 拿到射线第一个照射到的物体
-            //判断第一个是否有单击事件
-            intersects[0].object._mouseleave && intersects[0].object._mouseleave(event);
-            //判断后面是否有穿透事件
-            for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._mouseleaveThrough && intersects[i].object._mouseleaveThrough(event);
             }
         }
     });
@@ -255,10 +258,51 @@ TD.prototype._initRenderer = function (obj) {
     obj.container.appendChild(obj.renderer.domElement);
 };
 //随机数
-TD.prototype.Trand = function (min, max) {
+TD.prototype._Trand = function (min, max) {
     return Math.random() * (max - min) + min;
 };
+TD.prototype._EmittedRay = function(obj){
+    let mouse = new THREE.Vector2();
+    let raycaster = new THREE.Raycaster();
+    // 计算鼠标点击位置转换到3D场景后的位置
+    mouse.x = (obj._mousePosition[0] / obj.renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(obj._mousePosition[1] / obj.renderer.domElement.clientHeight) * 2 + 1;
+    // 由当前相机（视线位置）像点击位置发射线
+    raycaster.setFromCamera(mouse, obj.camera);
+    let intersects = raycaster.intersectObjects(obj.scene.children, true);
+    if (intersects.length > 0) {
+        var array = new Array();
+        intersects.forEach((item,index)=>{
+            array.push(item.object);
+        });
+       return array;
+    }
+    return [];
+};
+TD.prototype._hoverProcess = function(oldRayObjs,newRayObjs){
 
+   var different = oldRayObjs.concat(newRayObjs).filter(function(v, i, arr) {
+        return arr.indexOf(v) === arr.lastIndexOf(v);
+    });
+   if (different.length==0){
+       return;
+   }
+    different.forEach((item,index)=>{
+        //不在旧数组中    新添加
+        if (oldRayObjs.indexOf(item)==-1){
+            if (item.hasOwnProperty('_mouseenter')){
+                item._mouseenter();
+            }
+        }
+        //不在新数组中    新删除
+        if (newRayObjs.indexOf(item)==-1){
+            if (item.hasOwnProperty('_mouseleave')){
+                item._mouseleave();
+            }
+
+        }
+    });
+};
 //为所有Object3D对象添加事件
 //点击事件click
 THREE.Object3D.prototype.click = function (fn) {
@@ -285,5 +329,8 @@ THREE.Object3D.prototype.hoverThrough = function (mouseenter,mouseleave) {
     this._mouseenterThrough = mouseenter || undefined;
     this._mouseleaveThrough = mouseleave || undefined;
 };
+//所有对象都可以有一个渲染器事件(支持只Object3D对象 其他对象需要的话在原型方法上加入_rendererEventFn)
+THREE.Object3D.prototype._rendererEventFn = function (fn) {
+    this._rendererEventFn = fn || undefined;
+};
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
-class a{}

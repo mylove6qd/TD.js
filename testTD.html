@@ -65,10 +65,15 @@ td.renderer.setClearColor(0xEEEEEE,1.0);//后面一个参数是阿尔法通道 1
     plane.clickThrough(function () {
         this.material.color=(new THREE.Color(Math.random() * 0xffffff));
     });
+
     plane1.hover(function () {
-        
+        console.log(123);
+        td.addRendererEvent(plane1,function () {
+            this.rotation.z+=0.01;
+        })
     },function () {
-        
+        console.log(321);
+        td.removeRendererEventFromName(plane1.name);
     });
 
 </script>

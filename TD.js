@@ -8,8 +8,8 @@ class TD {
     render3D = function () {
         //每一帧发射射线获取对象存在属性中
         //处理hover事件 因为是每一帧渲染的 所以每一帧都需要判断当前是否有新的移入和新的移除事件
-        TD.prototype._hoverProcess(this._rayObjs,TD.prototype._EmittedRay(this));
-        this._rayObjs=TD.prototype._EmittedRay(this);
+        TD.prototype._hoverProcess(this._rayObjs, TD.prototype._EmittedRay(this));
+        this._rayObjs = TD.prototype._EmittedRay(this);
         //遍历运行所有的渲染器事件
 
         for (var [key, value] of this._rendererEventObjMap) {
@@ -24,8 +24,11 @@ class TD {
         this.renderer.render(this.scene, this.camera);
     };
     //向场景中添加对象
-    addToScene = function (obj3d,name) {
-        if(name==undefined){ this.scene.add(obj3d);return}
+    addToScene = function (obj3d, name) {
+        if (name == undefined) {
+            this.scene.add(obj3d);
+            return
+        }
         if (this._sceneChildrenNameId.has(name)) {
             return false;
         }
@@ -35,8 +38,8 @@ class TD {
         return true;
     };
     //添加多个
-    addsToScene = function (obj3ds,names) {
-        if(names==undefined){
+    addsToScene = function (obj3ds, names) {
+        if (names == undefined) {
             obj3ds.forEach((item, index) => {
                 this.addToScene(item);
             });
@@ -46,7 +49,7 @@ class TD {
             return;
         }
         names.forEach((item, index) => {
-            this.addToScene(obj3ds[index],item);
+            this.addToScene(obj3ds[index], item);
         });
     };
     //删除多个
@@ -93,36 +96,36 @@ class TD {
         }
     };
     //获取测试数据
-    getTestData=function(){
-        console.log('相机位置--',this.camera.position);
-        console.log('相机视角--',this.controls.target);
+    getTestData = function () {
+        console.log('相机位置--', this.camera.position);
+        console.log('相机视角--', this.controls.target);
     };
     //在渲染器中添加事件
-    addRendererEvent = function(obj,fn,eventName){
-        if (eventName==undefined){
-            if (obj.name!=""){
+    addRendererEvent = function (obj, fn, eventName) {
+        if (eventName == undefined) {
+            if (obj.name != "") {
                 eventName = obj.name
-            }else{
+            } else {
                 eventName = obj.uuid;
             }
         }
         obj._rendererEventFn = fn;
-        this._rendererEventObjMap.set(eventName,obj);
+        this._rendererEventObjMap.set(eventName, obj);
     };
     //在渲染器中删除事件
-    removeRendererEventFromName = function(eventName){
-        if (this._rendererEventObjMap.has(eventName)){
+    removeRendererEventFromName = function (eventName) {
+        if (this._rendererEventObjMap.has(eventName)) {
             //去掉对象上的方法
-            this._rendererEventObjMap.get(eventName)._rendererEventFn=undefined;
+            this._rendererEventObjMap.get(eventName)._rendererEventFn = undefined;
             this._rendererEventObjMap.delete(eventName);
         }
     };
     //查看所有的渲染器事件
-    allRendererEvent = function(){
+    allRendererEvent = function () {
         return this._rendererEventObjMap;
     };
     //获取渲染器事件
-    getRendererEventObjFromName = function(eventName){
+    getRendererEventObjFromName = function (eventName) {
         return this._rendererEventObjMap.get(eventName);
     };
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
@@ -160,12 +163,13 @@ class TD {
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
     }
 }
+
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
 //添加Object3D的事件监听
 TD.prototype._addMouseListener = function (obj) {
     //鼠标移动事件获取鼠标坐标
     obj.container.addEventListener("mousemove", (event) => {
-        obj._mousePosition=[event.clientX,  event.clientY];
+        obj._mousePosition = [event.clientX, event.clientY];
     });
     //单击事件
     obj.container.addEventListener("click", (event) => {
@@ -200,9 +204,9 @@ TD.prototype._addMouseListener = function (obj) {
         if (intersects.length > 0) {
             // 拿到射线第一个照射到的物体
             //是否是测试
-            if (obj._isTest==true){
+            if (obj._isTest == true) {
                 for (var i = 0; i < intersects.length; i++) {
-                    console.log('dblclick--'+i,intersects[i].object);
+                    console.log('dblclick--' + i, intersects[i].object);
                 }
             }
             //判断第一个是否有单击事件
@@ -261,7 +265,7 @@ TD.prototype._initRenderer = function (obj) {
 TD.prototype._Trand = function (min, max) {
     return Math.random() * (max - min) + min;
 };
-TD.prototype._EmittedRay = function(obj){
+TD.prototype._EmittedRay = function (obj) {
     let mouse = new THREE.Vector2();
     let raycaster = new THREE.Raycaster();
     // 计算鼠标点击位置转换到3D场景后的位置
@@ -272,32 +276,50 @@ TD.prototype._EmittedRay = function(obj){
     let intersects = raycaster.intersectObjects(obj.scene.children, true);
     if (intersects.length > 0) {
         var array = new Array();
-        intersects.forEach((item,index)=>{
+        intersects.forEach((item, index) => {
             array.push(item.object);
         });
-       return array;
+        return array;
     }
     return [];
 };
-TD.prototype._hoverProcess = function(oldRayObjs,newRayObjs){
+TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
+    //执行最上方的_mouseenter事件
+    if (newRayObjs.length != 0) {
+        if (newRayObjs[0].hasOwnProperty('_mouseenter')) {
+            if (newRayObjs[0].hasOwnProperty('_mouseenter')) {
+                newRayObjs[0]._mouseenter();
+            }
 
-   var different = oldRayObjs.concat(newRayObjs).filter(function(v, i, arr) {
+        }
+    }
+    //判断老的第一个是否还在
+    if (oldRayObjs.length != 0) {
+        if (newRayObjs.indexOf(oldRayObjs[0]) == -1) {
+            if (oldRayObjs[0].hasOwnProperty('_mouseleave')) {
+                oldRayObjs[0]._mouseleave();
+            }
+        }
+    }
+    var different = oldRayObjs.concat(newRayObjs).filter(function (v, i, arr) {
         return arr.indexOf(v) === arr.lastIndexOf(v);
     });
-   if (different.length==0){
-       return;
-   }
-    different.forEach((item,index)=>{
+    if (different.length == 0) {
+        return;
+    }
+    different.forEach((item, index) => {
         //不在旧数组中    新添加
-        if (oldRayObjs.indexOf(item)==-1){
-            if (item.hasOwnProperty('_mouseenter')){
-                item._mouseenter();
+        if (oldRayObjs.indexOf(item) == -1) {
+            //穿透
+            if (item.hasOwnProperty('_mouseenterThrough')) {
+                item._mouseenterThrough();
             }
         }
         //不在新数组中    新删除
-        if (newRayObjs.indexOf(item)==-1){
-            if (item.hasOwnProperty('_mouseleave')){
-                item._mouseleave();
+        if (newRayObjs.indexOf(item) == -1) {
+            //穿透
+            if (item.hasOwnProperty('_mouseleaveThrough')) {
+                item._mouseleaveThrough();
             }
 
         }
@@ -321,11 +343,11 @@ THREE.Object3D.prototype.dblclickThrough = function (fn) {
     this._dblclickThrough = fn || undefined;
 };
 //hover事件   hover=mouseenter指针进入（穿过）元素 + mouseleave指针离开元素
-THREE.Object3D.prototype.hover = function (mouseenter,mouseleave) {
+THREE.Object3D.prototype.hover = function (mouseenter, mouseleave) {
     this._mouseenter = mouseenter || undefined;
     this._mouseleave = mouseleave || undefined;
 };
-THREE.Object3D.prototype.hoverThrough = function (mouseenter,mouseleave) {
+THREE.Object3D.prototype.hoverThrough = function (mouseenter, mouseleave) {
     this._mouseenterThrough = mouseenter || undefined;
     this._mouseleaveThrough = mouseleave || undefined;
 };

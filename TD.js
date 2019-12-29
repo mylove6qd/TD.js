@@ -159,6 +159,7 @@ class TD {
         //窗口自动变化
         window.addEventListener('resize', TD.prototype._handleWindowResize.bind(this), false);
         //渲染
+
         this.render3D();
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
     }
@@ -245,9 +246,9 @@ TD.prototype._initControls = function (obj) {
 };
 //初始化相机
 TD.prototype._initCamera = function (obj) {
-    obj.camera.position.x = -10;
-    obj.camera.position.y = 10;
-    obj.camera.position.z = 5;
+    obj.camera.position.x = 0;
+    obj.camera.position.y = 0;
+    obj.camera.position.z = 0;
     //默认相机看向场景中心
     obj.camera.lookAt(obj.scene.position);
 };

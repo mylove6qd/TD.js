@@ -70,6 +70,11 @@ _开头的方法和属性是内部方法
     var td = new TD('id');
     //设置为全屏
     td.setAllScreen();
+    //修改默认相机的位置和视角方向    默认位置是0,0,0 视角方向是场景原点
+    td.camera.position.x = -10;
+    td.camera.position.y = 10;
+    td.camera.position.z = 5;
+    td.camera.lookAt(td.scene.position);
     //更改画布颜色
     td.renderer.setClearColor(0xEEEEEE, 1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
     //添加进场景 后面的是名字方便管理
@@ -110,8 +115,7 @@ _开头的方法和属性是内部方法
         })
     }, function () {
         td.removeRendererEventFromName(plane.name);
-    })
-
+    });
 </script>
 </html>
 ```

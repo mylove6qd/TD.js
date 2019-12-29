@@ -249,7 +249,7 @@ TD.prototype._initCamera = function (obj) {
     obj.camera.position.x = 0;
     obj.camera.position.y = 0;
     obj.camera.position.z = 0;
-    //默认相机的视角方向是指向场景中心的方向(不是看向场景中心)
+    //默认相机的视角方向是当前相机位置指向场景中心的方向
     obj.camera.lookAt(obj.scene.position);
 };
 //初始化渲染器

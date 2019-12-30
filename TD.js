@@ -4,6 +4,22 @@
 
 class TD {
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
+    //加载FBX模型方法
+    loadFBXModels = function (urls) {
+        //用数组的map映射为新的数组好了
+        var fbx_loader = new THREE.FBXLoader();
+
+        var promises = urls.map((url) => {
+            var promise = new Promise(function (resolve, reject) {
+                fbx_loader.load(url, (object) => {
+                    //把回调函数连带参数丢出去
+                    resolve(object);
+                });
+            });
+            return promise;
+        });
+        return Promise.all(promises);
+    };
     //渲染
     render3D = function () {
         //每一帧发射射线获取对象存在属性中
@@ -107,8 +123,8 @@ class TD {
     };
     //获取测试数据
     getTestData = function () {
-        console.log('相机位置--', this.camera.position);
-        console.log('相机视角--', this.controls.target);
+        console.log('camera.position--', this.camera.position);
+        console.log('controls.target--', this.controls.target);
     };
     //在渲染器中添加事件
     addRendererEvent = function (obj, fn, eventName) {

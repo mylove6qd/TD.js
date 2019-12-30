@@ -4,7 +4,18 @@
 
 class TD {
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
-    //加载FBX模型方法
+    //加载单个FBX模型方法
+    loadFBXModel = function (url) {
+        var promise = new Promise(function (resolve,reject) {
+            var fbx_loader = new THREE.FBXLoader();
+            fbx_loader.load(url,(object)=>{
+                //把回调函数连带参数丢出去
+                resolve(object);
+            });
+        });
+        return promise;
+    };
+    //加载多个FBX模型方法
     loadFBXModels = function (urls) {
         //用数组的map映射为新的数组好了
         var fbx_loader = new THREE.FBXLoader();
@@ -175,7 +186,7 @@ class TD {
         this.scene = new THREE.Scene();    //创建场景
         this._sceneChildrenNameId = new Map();   //可以被放入场景的名称和id的对应
         this.renderer = new THREE.WebGLRenderer();    //渲染器
-        this.camera = new THREE.PerspectiveCamera(60, this._WIDTH / this._HEIGHT, 1, 10000);
+        this.camera = new THREE.PerspectiveCamera(50, this._WIDTH / this._HEIGHT, 1, 1000000);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this._rendererEventObjMap = new Map();
         this._rayObjs = [];
@@ -270,8 +281,8 @@ TD.prototype._initStats = function (obj) {
 };
 //初始化视角工具
 TD.prototype._initControls = function (obj) {
-    obj.controls.minDistance = 1; //最小相机移动距离
-    obj.controls.maxDistance = 3000; //最大相机移动距离
+    // obj.controls.minDistance = 1; //最小相机移动距离
+    // obj.controls.maxDistance = 3000; //最大相机移动距离
     obj.controls.enableDamping = false; //是否开启惯性滑动
     obj.controls.dampingFactor = 0.25; //惯性滑动
     // obj.controls.autoRotate = true;
@@ -317,23 +328,6 @@ TD.prototype._EmittedRay = function (obj) {
     return [];
 };
 TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
-    //执行最上方的_mouseenter事件
-    if (newRayObjs.length != 0) {
-        if (newRayObjs[0].hasOwnProperty('_mouseenter')) {
-            if (newRayObjs[0].hasOwnProperty('_mouseenter')) {
-                newRayObjs[0]._mouseenter();
-            }
-
-        }
-    }
-    //判断老的第一个是否还在
-    if (oldRayObjs.length != 0) {
-        if (newRayObjs.indexOf(oldRayObjs[0]) == -1) {
-            if (oldRayObjs[0].hasOwnProperty('_mouseleave')) {
-                oldRayObjs[0]._mouseleave();
-            }
-        }
-    }
     var different = oldRayObjs.concat(newRayObjs).filter(function (v, i, arr) {
         return arr.indexOf(v) === arr.lastIndexOf(v);
     });
@@ -343,6 +337,16 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
     different.forEach((item, index) => {
         //不在旧数组中    新添加
         if (oldRayObjs.indexOf(item) == -1) {
+            //如果这个新添加是新的第一个 新添加启动进入 同时将后面的第一个启动移除
+            if(newRayObjs.indexOf(item)==0){
+                if (item.hasOwnProperty('_mouseenter')) {
+                    item._mouseenter();
+                }
+                //同时将后面的第一个启动移除
+                if (newRayObjs.length>2&&newRayObjs[1].hasOwnProperty('_mouseleave')) {
+                    newRayObjs[1]._mouseleave();
+                }
+            }
             //穿透
             if (item.hasOwnProperty('_mouseenterThrough')) {
                 item._mouseenterThrough();
@@ -350,11 +354,20 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
         }
         //不在新数组中    新删除
         if (newRayObjs.indexOf(item) == -1) {
+            //如果这个新删除是旧的第一个 新删除的启动移除 后面第一个启动进入
+            if (oldRayObjs.indexOf(item)==0){
+                if (item.hasOwnProperty('_mouseleave')) {
+                    item._mouseleave();
+                }
+                //同时将后面的第一个启动进入
+                if (oldRayObjs.length>2&&oldRayObjs[1].hasOwnProperty('_mouseenter')) {
+                    oldRayObjs[1]._mouseenter();
+                }
+            }
             //穿透
             if (item.hasOwnProperty('_mouseleaveThrough')) {
                 item._mouseleaveThrough();
             }
-
         }
     });
 };

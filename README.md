@@ -116,6 +116,8 @@ _开头的方法和属性是内部方法
     }, function () {
         td.removeRendererEventFromName(plane.name);
     });
+    //设置视线最大俯角
+    td.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角
 </script>
 </html>
 ```

@@ -270,7 +270,6 @@ TD.prototype._initStats = function (obj) {
 };
 //初始化视角工具
 TD.prototype._initControls = function (obj) {
-    obj.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角
     obj.controls.minDistance = 1; //最小相机移动距离
     obj.controls.maxDistance = 3000; //最大相机移动距离
     obj.controls.enableDamping = false; //是否开启惯性滑动

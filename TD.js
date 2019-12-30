@@ -23,11 +23,14 @@ class TD {
         });
         this.renderer.render(this.scene, this.camera);
     };
-    //向场景中添加对象
+    //向场景中添加对象  没有名字就默认用对象名字 没有就uuid
     addToScene = function (obj3d, name) {
         if (name == undefined) {
-            this.scene.add(obj3d);
-            return
+            if (obj3d.name!=''){
+                name = obj3d.name
+            }else{
+                name = obj3d.uuid;
+            }
         }
         if (this._sceneChildrenNameId.has(name)) {
             return false;
@@ -60,6 +63,13 @@ class TD {
     };
     //删除场景中的对象
     removeToScene = function (name) {
+        if (name instanceof Object){
+            if (name.name!=''){
+                name = name.name;
+            }else{
+                name = name.uuid;
+            }
+        }
         if (this._sceneChildrenNameId.has(name)) {
             this.removeToSceneFromId(this._sceneChildrenNameId.get(name));
             this._sceneChildrenNameId.delete(name);
@@ -112,8 +122,15 @@ class TD {
         obj._rendererEventFn = fn;
         this._rendererEventObjMap.set(eventName, obj);
     };
-    //在渲染器中删除事件
+    //在渲染器中删除事件 是对象就取对象的name或uuid
     removeRendererEventFromName = function (eventName) {
+        if (eventName instanceof Object){
+            if (eventName.name!=''){
+                eventName = eventName.name;
+            }else{
+                eventName = eventName.uuid;
+            }
+        }
         if (this._rendererEventObjMap.has(eventName)) {
             //去掉对象上的方法
             this._rendererEventObjMap.get(eventName)._rendererEventFn = undefined;

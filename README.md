@@ -44,9 +44,7 @@ _开头的方法和属性是内部方法
     plane.receiveShadow = true;
     //位置
     plane.rotation.x = -0.5 * Math.PI;
-    plane.position.x = 0;
-    plane.position.y = -10;
-    plane.position.z = 0;
+    plane.position.set(0,-10,0);
 
     var planeGeometry1 = new THREE.PlaneGeometry(15, 15, 1, 1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
     //定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
@@ -57,9 +55,7 @@ _开头的方法和属性是内部方法
     plane1.receiveShadow = true;
     //位置
     plane1.rotation.x = -0.5 * Math.PI;
-    plane1.position.x = 0;
-    plane1.position.y = -2;
-    plane1.position.z = 0;
+    plane1.position.set(0,-2,0);
     //白色自然光
     var ambientLight = new THREE.AmbientLight(0xFFFFFF);
     //以上是three.js的一些东西
@@ -71,9 +67,7 @@ _开头的方法和属性是内部方法
     //设置为全屏
     td.setAllScreen();
     //修改默认相机的位置和视角方向    默认位置是0,0,0 视角方向是场景原点
-    td.camera.position.x = -10;
-    td.camera.position.y = 10;
-    td.camera.position.z = 5;
+    td.camera.position.set(-73.40579538757072, 82.96908554776182,  53.13377987302329);
     td.camera.lookAt(td.scene.position);
     //更改画布颜色
     td.renderer.setClearColor(0xEEEEEE, 1.0);//后面一个参数是阿尔法通道 1表示不透明 0表示透明
@@ -92,8 +86,7 @@ _开头的方法和属性是内部方法
         //对象还是需要使用three.js的方法操作
         this.material.color = (new THREE.Color(Math.random() * 0xffffff));
     });
-    //穿透的点击事件 表示这个对象可以被穿透点击
-    plane.clickThrough(function () {
+    plane.click(function () {
         this.material.color = (new THREE.Color(Math.random() * 0xffffff));
     });
 
@@ -109,14 +102,14 @@ _开头的方法和属性是内部方法
         //按名字删除渲染器事件
         td.removeRendererEventFromName(plane1.name);
     });
-    plane.hoverThrough(function () {
+    plane.hover(function () {
         td.addRendererEvent(plane, function () {
             this.rotation.z += 0.01;
         })
     }, function () {
         td.removeRendererEventFromName(plane.name);
     });
-    //设置视线最大俯角
+    //设置最大俯角
     td.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角
 </script>
 </html>

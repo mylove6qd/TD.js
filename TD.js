@@ -40,7 +40,7 @@ class TD {
         //遍历运行所有的渲染器事件
 
         for (var [key, value] of this._rendererEventObjMap) {
-            value._rendererEventFn();
+            value[key]();
         }
         TWEEN.update();
         this.stats.update();
@@ -139,28 +139,23 @@ class TD {
     };
     //在渲染器中添加事件
     addRendererEvent = function (obj, fn, eventName) {
+        var size = obj._rendererEventFn.size;
         if (eventName == undefined) {
             if (obj.name != "") {
-                eventName = obj.name
+                eventName = obj.name+"_"+size;
             } else {
-                eventName = obj.uuid;
+                eventName = obj.uuid+"_"+size;
             }
         }
-        obj._rendererEventFn = fn;
+        obj[eventName] =fn;
         this._rendererEventObjMap.set(eventName, obj);
     };
     //在渲染器中删除事件 是对象就取对象的name或uuid
     removeRendererEventFromName = function (eventName) {
-        if (eventName instanceof Object){
-            if (eventName.name!=''){
-                eventName = eventName.name;
-            }else{
-                eventName = eventName.uuid;
-            }
-        }
+
         if (this._rendererEventObjMap.has(eventName)) {
             //去掉对象上的方法
-            this._rendererEventObjMap.get(eventName)._rendererEventFn = undefined;
+            delete (this._rendererEventObjMap.get(eventName))[eventName];
             this._rendererEventObjMap.delete(eventName);
         }
     };
@@ -227,8 +222,12 @@ TD.prototype._addMouseListener = function (obj) {
         raycaster.setFromCamera(mouse, obj.camera);
         let intersects = raycaster.intersectObjects(obj.scene.children, true);
         if (intersects.length > 0) {
-            for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._click && intersects[i].object._click(event);
+            // 拿到射线第一个照射到的物体
+            //判断第一个是否有单击事件
+            intersects[0].object._click && intersects[0].object._click(event);
+            //判断后面是否有穿透事件
+            for (var i = 1; i < intersects.length; i++) {
+                intersects[i].object._clickThrough && intersects[i].object._clickThrough(event);
             }
         }
     });
@@ -250,8 +249,11 @@ TD.prototype._addMouseListener = function (obj) {
                     console.log('dblclick--' + i, intersects[i].object);
                 }
             }
-            for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._dblclick && intersects[i].object._dblclick(event);
+            //判断第一个是否有单击事件
+            intersects[0].object._dblclick && intersects[0].object._dblclick(event);
+            //判断后面是否有穿透事件
+            for (var i = 1; i < intersects.length; i++) {
+                intersects[i].object._dblclickThrough && intersects[i].object._dblclickThrough(event);
             }
         }
     });
@@ -336,14 +338,20 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                     item._mouseenter();
                 }
                 //同时将后面的第一个启动移除
-                if (newRayObjs.length>2&&newRayObjs[1].hasOwnProperty('_mouseleave')) {
+                if (newRayObjs.length>1&&newRayObjs[1].hasOwnProperty('_mouseleave')) {
                     newRayObjs[1]._mouseleave();
                 }
+                //新元素后面的触发穿透
+                for(var i = 0 ;i<newRayObjs.length;i++){
+                    if (i==0){continue}
+                    if (newRayObjs[i].hasOwnProperty('_mouseenterThrough')) {
+                        newRayObjs[i]._mouseenterThrough();
+                    }
+                }
             }
-            //穿透
-            if (item.hasOwnProperty('_mouseenter')) {
-                item._mouseenter();
-            }
+
+
+
         }
         //不在新数组中    新删除
         if (newRayObjs.indexOf(item) == -1) {
@@ -353,14 +361,20 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                     item._mouseleave();
                 }
                 //同时将后面的第一个启动进入
-                if (oldRayObjs.length>2&&oldRayObjs[1].hasOwnProperty('_mouseenter')) {
+                if (oldRayObjs.length>1&&oldRayObjs[1].hasOwnProperty('_mouseenter')) {
                     oldRayObjs[1]._mouseenter();
                 }
+                //老元素后面的触发穿透
+                for(var i = 0 ;i<oldRayObjs.length;i++){
+                    if (i==0){continue}
+                    if (oldRayObjs[i].hasOwnProperty('_mouseleaveThrough')) {
+                        oldRayObjs[i]._mouseleaveThrough();
+                    }
+                }
             }
-            //穿透
-            if (item.hasOwnProperty('_mouseleave')) {
-                item._mouseleave();
-            }
+
+
+
         }
     });
 };
@@ -369,19 +383,27 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
 THREE.Object3D.prototype.click = function (fn) {
     this._click = fn || undefined;
 };
-
+//点击穿透事件clickThrough
+THREE.Object3D.prototype.clickThrough = function (fn) {
+    this._clickThrough = fn || undefined;
+};
 //双击事件dblclick
 THREE.Object3D.prototype.dblclick = function (fn) {
     this._dblclick = fn || undefined;
 };
-
+//双击穿透事件dblclickThrough
+THREE.Object3D.prototype.dblclickThrough = function (fn) {
+    this._dblclickThrough = fn || undefined;
+};
 //hover事件   hover=mouseenter指针进入（穿过）元素 + mouseleave指针离开元素
 THREE.Object3D.prototype.hover = function (mouseenter, mouseleave) {
     this._mouseenter = mouseenter || undefined;
     this._mouseleave = mouseleave || undefined;
 };
-//所有对象都可以有一个渲染器事件(支持只Object3D对象 其他对象需要的话在原型方法上加入_rendererEventFn)
-THREE.Object3D.prototype._rendererEventFn = function (fn) {
-    this._rendererEventFn = fn || undefined;
+THREE.Object3D.prototype.hoverThrough = function (mouseenter, mouseleave) {
+    this._mouseenterThrough = mouseenter || undefined;
+    this._mouseleaveThrough = mouseleave || undefined;
 };
+//所有对象都可以有多个渲染器事件(支持只Object3D对象 其他对象需要的话在原型方法上加入_rendererEventFn)
+THREE.Object3D.prototype._rendererEventFn = new Map();
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------

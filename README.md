@@ -97,17 +97,24 @@ _开头的方法和属性是内部方法
         //第三个是事件的名字 默认会使用对象的name name为空会使用uuid
         td.addRendererEvent(plane1, function () {
             this.rotation.z += 0.01;
-        })
+        },'plane1')
     }, function () {
         //按名字删除渲染器事件
-        td.removeRendererEventFromName(plane1.name);
+        td.removeRendererEventFromName('plane1');
     });
     plane.hover(function () {
         td.addRendererEvent(plane, function () {
             this.rotation.z += 0.01;
-        })
+        },'plane')
     }, function () {
-        td.removeRendererEventFromName(plane.name);
+        td.removeRendererEventFromName('plane');
+    });
+    plane.hoverThrough(function () {
+        td.addRendererEvent(plane, function () {
+            this.rotation.z -= 0.01;
+        },'plane2')
+    }, function () {
+        td.removeRendererEventFromName('plane2');
     });
     //设置最大俯角
     td.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角

@@ -86,8 +86,7 @@ _开头的方法和属性是内部方法
         //对象还是需要使用three.js的方法操作
         this.material.color = (new THREE.Color(Math.random() * 0xffffff));
     });
-    //穿透的点击事件 表示这个对象可以被穿透点击
-    plane.clickThrough(function () {
+    plane.click(function () {
         this.material.color = (new THREE.Color(Math.random() * 0xffffff));
     });
 
@@ -103,7 +102,7 @@ _开头的方法和属性是内部方法
         //按名字删除渲染器事件
         td.removeRendererEventFromName(plane1.name);
     });
-    plane.hoverThrough(function () {
+    plane.hover(function () {
         td.addRendererEvent(plane, function () {
             this.rotation.z += 0.01;
         })

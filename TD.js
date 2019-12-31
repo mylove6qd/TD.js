@@ -227,12 +227,8 @@ TD.prototype._addMouseListener = function (obj) {
         raycaster.setFromCamera(mouse, obj.camera);
         let intersects = raycaster.intersectObjects(obj.scene.children, true);
         if (intersects.length > 0) {
-            // 拿到射线第一个照射到的物体
-            //判断第一个是否有单击事件
-            intersects[0].object._click && intersects[0].object._click(event);
-            //判断后面是否有穿透事件
             for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._clickThrough && intersects[i].object._clickThrough(event);
+                intersects[i].object._click && intersects[i].object._click(event);
             }
         }
     });
@@ -254,11 +250,8 @@ TD.prototype._addMouseListener = function (obj) {
                     console.log('dblclick--' + i, intersects[i].object);
                 }
             }
-            //判断第一个是否有单击事件
-            intersects[0].object._dblclick && intersects[0].object._dblclick(event);
-            //判断后面是否有穿透事件
             for (var i = 0; i < intersects.length; i++) {
-                intersects[i].object._dblclickThrough && intersects[i].object._dblclickThrough(event);
+                intersects[i].object._dblclick && intersects[i].object._dblclick(event);
             }
         }
     });
@@ -348,8 +341,8 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                 }
             }
             //穿透
-            if (item.hasOwnProperty('_mouseenterThrough')) {
-                item._mouseenterThrough();
+            if (item.hasOwnProperty('_mouseenter')) {
+                item._mouseenter();
             }
         }
         //不在新数组中    新删除
@@ -365,8 +358,8 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                 }
             }
             //穿透
-            if (item.hasOwnProperty('_mouseleaveThrough')) {
-                item._mouseleaveThrough();
+            if (item.hasOwnProperty('_mouseleave')) {
+                item._mouseleave();
             }
         }
     });
@@ -376,26 +369,16 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
 THREE.Object3D.prototype.click = function (fn) {
     this._click = fn || undefined;
 };
-//点击穿透事件clickThrough
-THREE.Object3D.prototype.clickThrough = function (fn) {
-    this._clickThrough = fn || undefined;
-};
+
 //双击事件dblclick
 THREE.Object3D.prototype.dblclick = function (fn) {
     this._dblclick = fn || undefined;
 };
-//双击穿透事件dblclickThrough
-THREE.Object3D.prototype.dblclickThrough = function (fn) {
-    this._dblclickThrough = fn || undefined;
-};
+
 //hover事件   hover=mouseenter指针进入（穿过）元素 + mouseleave指针离开元素
 THREE.Object3D.prototype.hover = function (mouseenter, mouseleave) {
     this._mouseenter = mouseenter || undefined;
     this._mouseleave = mouseleave || undefined;
-};
-THREE.Object3D.prototype.hoverThrough = function (mouseenter, mouseleave) {
-    this._mouseenterThrough = mouseenter || undefined;
-    this._mouseleaveThrough = mouseleave || undefined;
 };
 //所有对象都可以有一个渲染器事件(支持只Object3D对象 其他对象需要的话在原型方法上加入_rendererEventFn)
 THREE.Object3D.prototype._rendererEventFn = function (fn) {

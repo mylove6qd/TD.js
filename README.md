@@ -84,37 +84,38 @@ _开头的方法和属性是内部方法
     //绑定点击事件
     plane1.click(function () {
         //对象还是需要使用three.js的方法操作
-        this.material.color = (new THREE.Color(Math.random() * 0xffffff));
+        this.material.color = new THREE.Color(Math.random() * 0xffffff);
+        plane.material.color = new THREE.Color(Math.random() * 0xffffff);
     });
     plane.click(function () {
-        this.material.color = (new THREE.Color(Math.random() * 0xffffff));
+        this.material.color = new THREE.Color(Math.random() * 0xffffff);
     });
 
     //绑定hover事件
     //第一个回调函数是鼠标进入的操作 第二个是鼠标移除的操作
     plane1.hover(function () {
         //因为动态的效果是需要渲染器渲染的 所以我意淫了渲染器事件这个东西  第一个参数是操作的对象 第二个是渲染器的执行函数
-        //第三个是事件的名字 默认会使用对象的name name为空会使用uuid
+        //第三个是事件的名字 (有默认)
         td.addRendererEvent(plane1, function () {
             this.rotation.z += 0.01;
-        },'plane1')
+        },'plane1_an')
     }, function () {
         //按名字删除渲染器事件
-        td.removeRendererEventFromName('plane1');
+        td.removeRendererEventFromName('plane1_an');
     });
     plane.hover(function () {
         td.addRendererEvent(plane, function () {
             this.rotation.z += 0.01;
-        },'plane')
+        },'plane_an')
     }, function () {
-        td.removeRendererEventFromName('plane');
+        td.removeRendererEventFromName('plane_an');
     });
     plane.hoverThrough(function () {
         td.addRendererEvent(plane, function () {
             this.rotation.z -= 0.01;
-        },'plane2')
+        },'plane_an2')
     }, function () {
-        td.removeRendererEventFromName('plane2');
+        td.removeRendererEventFromName('plane_an2');
     });
     //设置最大俯角
     td.controls.maxPolarAngle = Math.PI * 0.5; //最大俯视角

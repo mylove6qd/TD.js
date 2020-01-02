@@ -72,7 +72,7 @@
     //第一个回调函数是鼠标进入的操作 第二个是鼠标移除的操作
     plane1.hover(function () {
         //因为动态的效果是需要渲染器渲染的 所以我意淫了渲染器事件这个东西  第一个参数是操作的对象 第二个是渲染器的执行函数
-        //第三个是事件的名字 (有默认)
+        //第三个是事件的名字
         td.addRendererEvent(plane1, function () {
             this.rotation.z += 0.01;
         },'plane1_an')

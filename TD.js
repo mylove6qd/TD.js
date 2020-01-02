@@ -6,9 +6,9 @@ class TD {
     //-----------------------------------------------------------------方法-------------------------------------------------------------------------
     //加载单个FBX模型方法
     loadFBXModel = function (url) {
-        var promise = new Promise(function (resolve,reject) {
+        var promise = new Promise(function (resolve, reject) {
             var fbx_loader = new THREE.FBXLoader();
-            fbx_loader.load(url,(object)=>{
+            fbx_loader.load(url, (object) => {
                 //把回调函数连带参数丢出去
                 resolve(object);
             });
@@ -53,9 +53,9 @@ class TD {
     //向场景中添加对象  没有名字就默认用对象名字 没有就uuid
     addToScene = function (obj3d, name) {
         if (name == undefined) {
-            if (obj3d.name!=''){
+            if (obj3d.name != '') {
                 name = obj3d.name
-            }else{
+            } else {
                 name = obj3d.uuid;
             }
         }
@@ -90,10 +90,10 @@ class TD {
     };
     //删除场景中的对象
     removeToScene = function (name) {
-        if (name instanceof Object){
-            if (name.name!=''){
+        if (name instanceof Object) {
+            if (name.name != '') {
                 name = name.name;
-            }else{
+            } else {
                 name = name.uuid;
             }
         }
@@ -139,15 +139,7 @@ class TD {
     };
     //在渲染器中添加事件
     addRendererEvent = function (obj, fn, eventName) {
-        var size = obj._rendererEventFn.size;
-        if (eventName == undefined) {
-            if (obj.name != "") {
-                eventName = obj.name+"_"+size;
-            } else {
-                eventName = obj.uuid+"_"+size;
-            }
-        }
-        obj[eventName] =fn;
+        obj[eventName] = fn;
         this._rendererEventObjMap.set(eventName, obj);
     };
     //在渲染器中删除事件 是对象就取对象的name或uuid
@@ -333,48 +325,48 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
         //不在旧数组中    新添加
         if (oldRayObjs.indexOf(item) == -1) {
             //如果这个新添加是新的第一个 新添加启动进入 同时将后面的第一个启动移除
-            if(newRayObjs.indexOf(item)==0){
+            if (newRayObjs.indexOf(item) == 0) {
                 if (item.hasOwnProperty('_mouseenter')) {
                     item._mouseenter();
                 }
-                //同时将后面的第一个启动移除
-                if (newRayObjs.length>1&&newRayObjs[1].hasOwnProperty('_mouseleave')) {
+                //同时将后面的第一个启动移除 触发穿透
+                if (newRayObjs.length > 1 && newRayObjs[1].hasOwnProperty('_mouseleave')) {
                     newRayObjs[1]._mouseleave();
                 }
-                //新元素后面的触发穿透
-                for(var i = 0 ;i<newRayObjs.length;i++){
-                    if (i==0){continue}
-                    if (newRayObjs[i].hasOwnProperty('_mouseenterThrough')) {
-                        newRayObjs[i]._mouseenterThrough();
-                    }
+                if (newRayObjs.length > 1 && newRayObjs[1].hasOwnProperty('_mouseenterThrough')) {
+                    newRayObjs[1]._mouseenterThrough();
+                }
+            } else {
+                //如果这个元素不是第一个 则触发他的穿透
+                if (item.hasOwnProperty('_mouseenterThrough')) {
+                    item._mouseenterThrough();
                 }
             }
-
-
-
         }
+        //new 2 3
+        //old 1 2 3
         //不在新数组中    新删除
         if (newRayObjs.indexOf(item) == -1) {
             //如果这个新删除是旧的第一个 新删除的启动移除 后面第一个启动进入
-            if (oldRayObjs.indexOf(item)==0){
+            if (oldRayObjs.indexOf(item) == 0) {
                 if (item.hasOwnProperty('_mouseleave')) {
                     item._mouseleave();
                 }
                 //同时将后面的第一个启动进入
-                if (oldRayObjs.length>1&&oldRayObjs[1].hasOwnProperty('_mouseenter')) {
+                if (oldRayObjs.length > 1 && oldRayObjs[1].hasOwnProperty('_mouseenter')) {
                     oldRayObjs[1]._mouseenter();
                 }
-                //老元素后面的触发穿透
-                for(var i = 0 ;i<oldRayObjs.length;i++){
-                    if (i==0){continue}
-                    if (oldRayObjs[i].hasOwnProperty('_mouseleaveThrough')) {
-                        oldRayObjs[i]._mouseleaveThrough();
-                    }
+                //触发穿透
+                if (oldRayObjs.length > 1 && oldRayObjs[1].hasOwnProperty('_mouseleaveThrough')) {
+                    oldRayObjs[1]._mouseleaveThrough();
+                }
+
+            } else {
+                //如果这个元素不是第一个 则触发他的穿透
+                if (item.hasOwnProperty('_mouseleaveThrough')) {
+                    item._mouseleaveThrough();
                 }
             }
-
-
-
         }
     });
 };

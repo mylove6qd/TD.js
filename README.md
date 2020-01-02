@@ -31,9 +31,6 @@ _开头的方法和属性是内部方法
 <script language='javascript' src='lib/dat.gui.min.js'></script>
 <script src="TD.js"></script>
 <script type="text/javascript">
-
-
-
     //创建2个平面图形 使用平面几何学
     var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
     //定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
@@ -45,7 +42,6 @@ _开头的方法和属性是内部方法
     //位置
     plane.rotation.x = -0.5 * Math.PI;
     plane.position.set(0,-10,0);
-
     var planeGeometry1 = new THREE.PlaneGeometry(15, 15, 1, 1)//后两个参数为长宽的段数 默认为1 段数越多在弯曲的时候就越柔和
     //定义一个材质 使用随机颜色 半透明 0表示透明 1表示不透明
     var planeMaterial1 = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff, opacity: 0.5});
@@ -59,9 +55,6 @@ _开头的方法和属性是内部方法
     //白色自然光
     var ambientLight = new THREE.AmbientLight(0xFFFFFF);
     //以上是three.js的一些东西
-
-
-
     //创建td对象
     var td = new TD('id');
     //设置为全屏
@@ -80,7 +73,6 @@ _开头的方法和属性是内部方法
     td.removeToScene('plane1');
     //1秒后添加平面
     setTimeout("td.addToScene(plane1, 'plane1')",1000);
-
     //绑定点击事件
     plane1.click(function () {
         //对象还是需要使用three.js的方法操作
@@ -90,13 +82,12 @@ _开头的方法和属性是内部方法
     plane.click(function () {
         this.material.color = new THREE.Color(Math.random() * 0xffffff);
     });
-
     //绑定hover事件
     //第一个回调函数是鼠标进入的操作 第二个是鼠标移除的操作
     plane1.hover(function () {
         //因为动态的效果是需要渲染器渲染的 所以我意淫了渲染器事件这个东西  第一个参数是操作的对象 第二个是渲染器的执行函数
-        //第三个是事件的名字 
-        td.addRendererEvent(plane1, function () {
+        //第三个是事件的名字
+        td.addRendererEvent(this, function () {
             this.rotation.z += 0.01;
         },'plane1_an')
     }, function () {
@@ -104,14 +95,14 @@ _开头的方法和属性是内部方法
         td.removeRendererEventFromName('plane1_an');
     });
     plane.hover(function () {
-        td.addRendererEvent(plane, function () {
+        td.addRendererEvent(this, function () {
             this.rotation.z += 0.01;
         },'plane_an')
     }, function () {
         td.removeRendererEventFromName('plane_an');
     });
     plane.hoverThrough(function () {
-        td.addRendererEvent(plane, function () {
+        td.addRendererEvent(this, function () {
             this.rotation.z -= 0.01;
         },'plane_an2')
     }, function () {

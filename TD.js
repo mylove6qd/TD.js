@@ -190,12 +190,10 @@ class TD {
         //窗口自动变化
         window.addEventListener('resize', TD.prototype._handleWindowResize.bind(this), false);
         //渲染
-
         this.render3D();
         //-----------------------------------------------------------------初始化-------------------------------------------------------------------------
     }
 }
-
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------
 //添加Object3D的事件监听
 TD.prototype._addMouseListener = function (obj) {
@@ -213,13 +211,45 @@ TD.prototype._addMouseListener = function (obj) {
         // 由当前相机（视线位置）像点击位置发射线
         raycaster.setFromCamera(mouse, obj.camera);
         let intersects = raycaster.intersectObjects(obj.scene.children, true);
+        //所有最高层上面有on事件的对象
         if (intersects.length > 0) {
+            //只要在组上设置了点击事件 组中所有对象的点击事件都会被覆盖
+            //所以我们会把第一个取到的元素的有点击事件的组触发
+            //后面会触发有穿透点击事件的组触发
+
+            //强如intersects中保存带有该事件的最高层元素或组
+            //第一个 带有点击事件的
+            //后面的 带有点击穿透事件的
+
+            var array = new Array();
+            for (var i = 0; i < intersects.length; i++) {
+                var callChainToScenc = TD.prototype._callChainToScenc(intersects[i].object);
+                if (i==0){
+                    for (let j = 0; j <callChainToScenc.length; j++) {
+                        if (callChainToScenc[j].hasOwnProperty('_click')){
+                            array.push(callChainToScenc[j]);
+                            break;
+                        }else{
+                            array.push(callChainToScenc[j]);
+                        }
+                    }
+                }else{
+                    for (let j = 0; j <callChainToScenc.length; j++) {
+                        if (callChainToScenc[j].hasOwnProperty('_clickThrough')){
+                            array.push(callChainToScenc[j]);
+                            break;
+                        }else{
+                            array.push(callChainToScenc[j]);
+                        }
+                    }
+                }
+            }
             // 拿到射线第一个照射到的物体
             //判断第一个是否有单击事件
-            intersects[0].object._click && intersects[0].object._click(event);
             //判断后面是否有穿透事件
-            for (var i = 1; i < intersects.length; i++) {
-                intersects[i].object._clickThrough && intersects[i].object._clickThrough(event);
+            for (var i = 0; i < array.length; i++) {
+                array[0]._click && array[0]._click(event);
+                if (i>0) {array[i]._clickThrough && array[i]._clickThrough(event)};
             }
         }
     });
@@ -234,18 +264,43 @@ TD.prototype._addMouseListener = function (obj) {
         raycaster.setFromCamera(mouse, obj.camera);
         let intersects = raycaster.intersectObjects(obj.scene.children, true);
         if (intersects.length > 0) {
-            // 拿到射线第一个照射到的物体
-            //是否是测试
-            if (obj._isTest == true) {
-                for (var i = 0; i < intersects.length; i++) {
-                    console.log('dblclick--' + i, intersects[i].object);
+            //只要在组上设置了点击事件 组中所有对象的点击事件都会被覆盖
+            //所以我们会把第一个取到的元素的有点击事件的组触发
+            //后面会触发有穿透点击事件的组触发
+
+            //强如intersects中保存带有该事件的最高层元素或组
+            //第一个 带有点击事件的
+            //后面的 带有点击穿透事件的
+
+            var array = new Array();
+            for (var i = 0; i < intersects.length; i++) {
+                var callChainToScenc = TD.prototype._callChainToScenc(intersects[i].object);
+                if (i==0){
+                    for (let j = 0; j <callChainToScenc.length; j++) {
+                        if (callChainToScenc[j].hasOwnProperty('_dblclick')){
+                            array.push(callChainToScenc[j]);
+                            break;
+                        }else{
+                            array.push(callChainToScenc[j]);
+                        }
+                    }
+                }else{
+                    for (let j = 0; j <callChainToScenc.length; j++) {
+                        if (callChainToScenc[j].hasOwnProperty('_dblclickThrough')){
+                            array.push(callChainToScenc[j]);
+                            break;
+                        }else{
+                            array.push(callChainToScenc[j]);
+                        }
+                    }
                 }
             }
+            // 拿到射线第一个照射到的物体
             //判断第一个是否有单击事件
-            intersects[0].object._dblclick && intersects[0].object._dblclick(event);
             //判断后面是否有穿透事件
-            for (var i = 1; i < intersects.length; i++) {
-                intersects[i].object._dblclickThrough && intersects[i].object._dblclickThrough(event);
+            for (var i = 0; i < array.length; i++) {
+                array[0]._dblclick && array[0]._dblclick(event);
+                if (i>0) {array[i]._dblclickThrough && array[i]._dblclickThrough(event)};
             }
         }
     });
@@ -314,12 +369,43 @@ TD.prototype._EmittedRay = function (obj) {
     }
     return [];
 };
+//子对象到场景的调用链
+TD.prototype._callChainToScenc = function(obj){
+    var array = new Array();
+    array.push(obj);
+    while (obj.parent && obj.parent.type !== 'Scene') {
+        obj = obj.parent;
+        array.push(obj);
+    }
+    return array.reverse();
+};
 TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
+    //不同的元素
     var different = oldRayObjs.concat(newRayObjs).filter(function (v, i, arr) {
         return arr.indexOf(v) === arr.lastIndexOf(v);
     });
+    //没有改变的元素
     if (different.length == 0) {
         return;
+    }
+    //如果是一帧内没有检测到
+    if (different.length==oldRayObjs.length){
+        var tag = true;
+        for (let i = 0; i < different.length; i++) {
+            if (different[i]!=oldRayObjs[i]){
+                tag==false;
+            }
+        }
+        if (tag){
+            oldRayObjs.forEach((item,index)=>{
+                if (item.hasOwnProperty('_mouseleaveThrough')) {
+                    item._mouseleaveThrough();
+                }
+                if (item.hasOwnProperty('_mouseleave')) {
+                    item._mouseleave();
+                }
+            })
+        }
     }
     different.forEach((item, index) => {
         //不在旧数组中    新添加
@@ -360,19 +446,46 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                 if (oldRayObjs.length > 1 && oldRayObjs[1].hasOwnProperty('_mouseleaveThrough')) {
                     oldRayObjs[1]._mouseleaveThrough();
                 }
-
             } else {
                 //如果这个元素不是第一个 则触发他的穿透
                 if (item.hasOwnProperty('_mouseleaveThrough')) {
                     item._mouseleaveThrough();
                 }
+                //如果是一帧内没有检测到
+                if (item.hasOwnProperty('_mouseleave')) {
+                    item._mouseleave();
+                }
             }
         }
     });
 };
+//递归删除方法
+TD.prototype.deletePropertyRecursive=function(obj,name){
+    if (obj.type=="Group"){
+        if (obj.hasOwnProperty(name)){
+            delete obj[name];
+        }
+    }else{
+        obj.children.forEach((item)=>{
+            TD.prototype.deletePropertyRecursive(item,name);
+        })
+    }
+};
 //为所有Object3D对象添加事件
 //点击事件click
 THREE.Object3D.prototype.click = function (fn) {
+    if (this.type=="Group"){
+        //如果是组的话 覆盖组内所有元素的此方法
+        TD.prototype.deletePropertyRecursive(this,"_click");
+    }else{
+        //如果不是组的话 覆盖组上所有元素的此方法
+        var reverse = TD.prototype._callChainToScenc(this).reverse();
+        reverse.forEach((obj)=>{
+            if (obj.hasOwnProperty("_click")&&obj.type=='Group'){
+                delete obj._click;
+            }
+        })
+    }
     this._click = fn || undefined;
 };
 //点击穿透事件clickThrough

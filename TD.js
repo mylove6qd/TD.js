@@ -509,6 +509,4 @@ THREE.Object3D.prototype.hoverThrough = function (mouseenter, mouseleave) {
     this._mouseenterThrough = mouseenter || undefined;
     this._mouseleaveThrough = mouseleave || undefined;
 };
-//所有对象都可以有多个渲染器事件(支持只Object3D对象 其他对象需要的话在原型方法上加入_rendererEventFn)
-THREE.Object3D.prototype._rendererEventFn = new Map();
 //-----------------------------------------------------------------其他方法-------------------------------------------------------------------------

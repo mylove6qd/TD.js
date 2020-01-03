@@ -442,12 +442,10 @@ TD.prototype._hoverProcess = function (oldRayObjs, newRayObjs) {
                 }
             }
         }
-        console.log(array1);
     }
 
 
     newRayObjs = array1;
-    //  console.log(newRayObjs);
 
 
     var array = new Array();

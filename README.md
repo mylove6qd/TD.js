@@ -113,5 +113,5 @@ _开头的方法和属性是内部方法
 </script>
 </html>
 ```
-效果
+## 效果
 ![](https://github.com/mylove6qd/TD.js/raw/master/resources/bird_test.gif)

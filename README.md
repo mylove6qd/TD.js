@@ -114,4 +114,4 @@ _开头的方法和属性是内部方法
 </html>
 ```
 效果
-![](https://github.com/mylove6qd/TD.js/resources/bird_test.gif)
+![](https://github.com/mylove6qd/TD.js/raw/master/resources/bird_test.gif)
